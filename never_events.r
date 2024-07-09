@@ -4,6 +4,9 @@ setwd("xxx")
 
 start <- Sys.time()
 
+oldw <- getOption("warn")
+options(warn = -1)
+
 #load/install a packages
 source("install_R_packages.R")
 
@@ -278,3 +281,35 @@ df.procedures$patient_id <- sub("Patient/", "", df.procedures$patient_id)
 
 df.procedures$performed_date <- as.POSIXct(df.procedures$performed_date ,format="%Y-%m-%dT%H:%M:%S")
 
+df.procedures <- df.procedures[, -7]
+
+
+complete <- left_join(df.encounters, df.procedures, by = "encounter_id")
+dup <- which(duplicated(complete) == TRUE)
+
+
+data <- left_join(df.patients,df.procedures, by = "patient_id")
+
+data <- unique(data)
+
+data <- left_join(data, df.conditions, by = "encounter_id", relationship = "many-to-many")
+
+data <- left_join(data, df.encounters.trunc, by = "encounter_id", relationship = "many-to-many")
+
+data$system.y <- NULL
+data$patient_id.y <- NULL
+data$resource_identifier <- NULL
+data$patient_id <- NULL
+data$system.x <- NULL
+
+colnames(data)[1] <- "patient_id"
+
+data <- unique(data)
+
+data$birthdate <- as.numeric(difftime(as.Date("2024-01-01"),as.Date(data$birthdate), units = "days")/365.2422)
+
+names(data)[names(data) == "birthdate"] <- "age"
+
+options(warn = oldw)
+
+write.csv(data, "data.csv")
