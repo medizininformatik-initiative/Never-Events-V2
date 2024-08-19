@@ -46,8 +46,7 @@ encounter_request <- fhir_url(url = conf$serverbase,
 patients <- fhir_table_description(resource = "Patient",
                                    cols = c(patient_id = "id",
                                             gender        = "gender",
-                                            birthdate     = "birthDate",
-                                            patient_zip   = "address/postalCode"),
+                                            birthdate     = "birthDate"),
                                    style = fhir_style(sep=sep,
                                                       brackets = brackets,
                                                       rm_empty_cols = FALSE)
@@ -312,4 +311,4 @@ names(data)[names(data) == "birthdate"] <- "age"
 
 options(warn = oldw)
 
-write.csv(data, "data.csv")
+fwrite(data, "data.csv")
